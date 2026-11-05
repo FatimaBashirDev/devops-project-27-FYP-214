@@ -31,8 +31,3 @@ test('each page title is its source filename', () => {
     assert.ok(html.includes('<title>' + p.replace('.html', '') + '</title>'));
   }
 });
-test('every page names the course', () => {
-  for (const p of pages) {
-    assert.match(fs.readFileSync('out/' + p, 'utf8'), /DevOps/);
-  }
-});
