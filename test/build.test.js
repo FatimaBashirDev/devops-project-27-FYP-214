@@ -26,3 +26,7 @@ test('no page is empty', () => {
 });
 
 test('this always fails', () => assert.ok(false));
+test('page title matches original', () => {
+  const html = fs.readFileSync('out/index.html', 'utf8');
+  assert.ok(html.includes('<title>Original Title</title>'));
+});
