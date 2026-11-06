@@ -21,6 +21,6 @@ fs.mkdirSync(path.dirname(dest), { recursive: true });
 fs.writeFileSync(dest, `<!doctype html>
 <html lang="en">
 <meta charset="utf-8">
-<title>${title}</title>
+<title>Our Services</title>
 ${body}</html>
 `);
