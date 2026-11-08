@@ -1,38 +1,40 @@
-SRC_DIR := src
 OUT_DIR := out
+SRC_DIR := src
 SOURCES := $(wildcard $(SRC_DIR)/*.md)
-OUTPUTS := $(patsubst $(SRC_DIR)/%.md,$(OUT_DIR)/%.html,$(SOURCES))
+PAGES := $(patsubst $(SRC_DIR)/%.md,$(OUT_DIR)/%.html,$(SOURCES))
 
-.PHONY: all deps check build test clean ci package
+.PHONY: all build clean test coverage lint check deps package ci
 
-all: test
+all: build
 
-node_modules: package-lock.json
-	npm ci
-	@touch node_modules
+deps:
+	npm install
 
-deps: node_modules ## install exactly what the lock file says
+build: $(PAGES)
 
-$(OUT_DIR):
-	mkdir -p $(OUT_DIR)
-
-$(OUT_DIR)/%.html: $(SRC_DIR)/%.md package-lock.json | $(OUT_DIR) node_modules
-	@echo "  BUILD $< -> $@"
-	@npm run --silent build -- $< $@
+$(OUT_DIR)/%.html: $(SRC_DIR)/%.md tools/build.js
+	@mkdir -p $(OUT_DIR)
+	node tools/build.js $< $@
 
 check:
-	@if [ ! -d "$(SRC_DIR)" ] || [ -z "$(SOURCES)" ]; then echo "ERROR: no .md files found in $(SRC_DIR)"; exit 1; fi
-	@echo "check: $(words $(SOURCES)) source file(s) in $(SRC_DIR)"
+	@test -d $(SRC_DIR) || (echo "Missing src dir" && exit 1)
 
-build: $(OUTPUTS)
+test: build
+	node --test
 
-test: build ## run the test suite against what was built
-	@npm test --silent
+coverage: build
+	@mkdir -p coverage
+	node --test --experimental-test-coverage \
+	  --test-reporter=spec --test-reporter-destination=stdout \
+	  --test-reporter=lcov --test-reporter-destination=coverage/lcov.info
+
+lint: node_modules
+	npm run --silent lint
+
+package: build test
+	npm pack
 
 clean:
-	rm -rf $(OUT_DIR) *.tgz
+	rm -rf $(OUT_DIR) coverage *.tgz
 
-ci: clean deps check test package
-
-package: test ## produce the versioned artifact
-	npm pack
+ci: clean deps check lint test package
