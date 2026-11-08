@@ -36,3 +36,4 @@ ci: clean deps check test package
 
 package: test ## produce the versioned artifact
 	npm pack
+

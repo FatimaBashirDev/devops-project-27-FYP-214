@@ -1,5 +1,3 @@
-// test/render.test.js unit tests that load tools/build.js directly,
-// so the coverage report finally measures the code that matters.
 const { test } = require('node:test');
 const assert = require('node:assert');
 const os = require('os');
